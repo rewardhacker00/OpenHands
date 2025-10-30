@@ -3,8 +3,14 @@ import os
 import tarfile
 from glob import glob
 
-from e2b import Sandbox as E2BSandbox
-from e2b.sandbox.exception import TimeoutException
+try:
+    from e2b import Sandbox as E2BSandbox
+    from e2b.sandbox.exception import TimeoutException
+    _E2B_IMPORT_ERROR: Exception | None = None
+except ImportError as exc:  # pragma: no cover - optional dependency
+    E2BSandbox = None  # type: ignore[assignment]
+    TimeoutException = Exception  # type: ignore[assignment]
+    _E2B_IMPORT_ERROR = exc
 
 from openhands.core.config import SandboxConfig
 from openhands.core.logger import openhands_logger as logger
@@ -22,6 +28,13 @@ class E2BBox:
         e2b_api_key: str,
         template: str = 'openhands',
     ):
+        if E2BSandbox is None:  # pragma: no cover - guard for optional dependency
+            message = (
+                'E2B sandbox runtime requested but the `e2b` package is not '
+                'available. Install a compatible `e2b` release or configure '
+                'OpenHands to use a different sandbox backend.'
+            )
+            raise RuntimeError(message) from _E2B_IMPORT_ERROR
         self.config = copy.deepcopy(config)
         self.initialize_plugins: bool = config.initialize_plugins
         self.sandbox = E2BSandbox(
