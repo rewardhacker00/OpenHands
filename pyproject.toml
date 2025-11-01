@@ -10,6 +10,12 @@ packages = [
   { include = "openhands/**/*" },
   { include = "evaluation/**/*" }
 ]
+include = [
+  { path = "pyproject.toml", format = "wheel" },
+  { path = "poetry.lock", format = "wheel" },
+  { path = "pyproject.toml", format = "sdist" },
+  { path = "poetry.lock", format = "sdist" }
+]
 
 [tool.poetry.dependencies]
 python = "^3.12"
